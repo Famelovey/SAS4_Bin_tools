@@ -104,10 +104,10 @@ IntOrFloat5A = [0, 1]
 Row1 = []
 Row2 = []
 # Enemy related stuff
-EnemyName = ["Shambler", "Stalker", "Spitter", "Runner", "Bloater", "Shielder", "Zombdroid Servant", "Zombdroid Soldier", "Worm", "Puke Worm", "Regurgitator", "Necrosis", "Necrosis Spawn", "Zombie Mech", "Wicker", "Devastator", "Loaderbot"]
-EnemyNameSize = [18, 18, 18, 16, 18, 20, 38, 38, 12, 22, 28, 20, 32, 26, 16, 24, 22]
+EnemyName = ["Shambler", "Stalker", "Spitter", "Runner", "Bloater", "Shielder", "Zombdroid Servant", "Zombdroid Soldier", "Worm", "Puke Worm", "Regurgitator", "Necrosis", "Necrosis Spawn", "Zombie Mech", "Wicker", "Devastator", "Loaderbot", "aaa"]
+EnemyNameSize = [18, 18, 18, 16, 18, 20, 38, 38, 12, 22, 28, 20, 32, 26, 16, 24, 22, 18]
 EnemyNameOrder = 0
-EnemyGrades = [4, 4, 4, 4, 4, 4, 5, 4, 4, 4, 2, 2, 6, 2, 2, 2, 2]
+EnemyGrades = [4, 4, 4, 4, 4, 4, 5, 4, 4, 4, 2, 2, 6, 2, 2, 2, 2, 4]
 EnemyGradeOrder = 0
 EnemyGradeOrder1 = 0
 EnemyGradeOrderES = 0
