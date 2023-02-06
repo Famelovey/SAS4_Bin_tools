@@ -1,7 +1,7 @@
 # SAS4_Bin_tools
 Tools that i wrote (with the help of BowDown097#8946, NkIsAwesome#5882 and trainy#1000) for reading SAS 4 .bin files.
 
-To make this tools work, you need Python 3.x.
+In order to make these tools work, you need Python 3.x.
 
 After you've downloaded the .rar file, follow these steps:
 
