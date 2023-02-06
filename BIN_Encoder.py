@@ -3,19 +3,23 @@
 import binascii # Used for HEX reading
 import csv      # Used for writing down numbers in .txt file
 import struct   # Used for HEX float processing
+import os       # Used for folder
 from collections import defaultdict
 
 # ---------------
 
 # Prompt
 
+if os.path.exists(os.path.dirname(os.path.abspath(__file__)) + '\\Encoded .bin files\\') == 0:
+    os.makedirs(os.path.dirname(os.path.abspath(__file__)) + '\\Encoded .bin files\\')
+
 print('Availble commands:')
 print('')
 print('1. Weapons.csv')
 print('2. Ammo.csv')
 print('3. Equipment.csv')
-print("4. Enemies.bin")
-print("5. Augments.bin (WIP, Doesn't work)")
+print("4. Enemies.csv")
+print("5. Augments.csv")
 print('')
 print('0. Exit the app')
 print('')
@@ -23,26 +27,26 @@ SelectedCSV = int(input('Select the .csv you want to encode: '))
 
 if SelectedCSV == 0:
     exit()
-elif SelectedCSV > 5 or SelectedCSV < 0:
+elif SelectedCSV > 6 or SelectedCSV < 0:
     raise ValueError('The selected number is invalid. Try again.')
 
 # Main code
-
-if SelectedCSV == 1:
-    CSVFile = 'weapons.csv'
-    BinaryEncoded = open('Output/weapons.bin', "wb")
+	
+if SelectedCSV == 1 or SelectedCSV == 6:
+    CSVFile = os.path.dirname(os.path.abspath(__file__)) + '\\Decoded .bin files\\' + 'weapons.csv'
+    BinaryEncoded = open(os.path.dirname(os.path.abspath(__file__)) + '\\Encoded .bin files\\' + 'weapons.bin', "wb")
 elif SelectedCSV == 2:
-    CSVFile = 'ammo.csv'
-    BinaryEncoded = open("Output/ammo.bin", "wb")
+    CSVFile = os.path.dirname(os.path.abspath(__file__)) + '\\Decoded .bin files\\' + 'ammo.csv'
+    BinaryEncoded = open(os.path.dirname(os.path.abspath(__file__)) + '\\Encoded .bin files\\' + 'ammo.bin', "wb")
 elif SelectedCSV == 3:
-    CSVFile = 'equipment.csv'
-    BinaryEncoded = open('Output/equipment.bin', "wb")
+    CSVFile = os.path.dirname(os.path.abspath(__file__)) + '\\Decoded .bin files\\' + 'equipment.csv'
+    BinaryEncoded = open(os.path.dirname(os.path.abspath(__file__)) + '\\Encoded .bin files\\' + 'equipment.bin', "wb")
 elif SelectedCSV == 4:
-    CSVFile = 'enemies.csv'
-    BinaryEncoded = open('Output/enemies.bin', "wb")
+    CSVFile = os.path.dirname(os.path.abspath(__file__)) + '\\Decoded .bin files\\' + 'enemies.csv'
+    BinaryEncoded = open(os.path.dirname(os.path.abspath(__file__)) + '\\Encoded .bin files\\' + 'enemies.bin', "wb")
 elif SelectedCSV == 5:
-    raise ValueError('Option is still WIP')
-    exit()
+    CSVFile = os.path.dirname(os.path.abspath(__file__)) + '\\Decoded .bin files\\' + 'augments.csv'
+    BinaryEncoded = open(os.path.dirname(os.path.abspath(__file__)) + '\\Encoded .bin files\\' + 'augments.bin', "wb")
 
 ## DO NOT CHANGE
 ## -------------
@@ -51,7 +55,8 @@ ByteOrder2 = [4, 2, 8, 2, 8, 2, 8, 8, 8, 8, 8, 8, 8, 4, 4, 8, 4, 4, 4, 4, 8, 8, 
 ByteOrder3 = [4, 4, 4, 2, 4, 4, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 4, 4, 4, 2, 4]
 ByteOrder4 = [8, 'text', 4, 8, 8, 2, 8, 8, 8, 8, 8, 8, 8, 4, 4, 4, 8]
 ByteOrder4ES = [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]
-ByteOrder5 = [4, 2, 2, 2, 8, 4, 8, 4, 2]
+ByteOrder5 = [4, 2, 2, 2, 8, 4, 8, 4]
+ByteOrderA = [4, 2, 2, 2, 2, 2, 2, 2, 2, 8, 4, 8, 4]
 IntOrFloat1 = [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0]
 IntOrFloat2 = [1]
 IntOrFloat3 = [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
@@ -68,8 +73,8 @@ EnemyName = ['00085368616D626C6572','00075374616C6B6572','000753706974746572','0
 # 0 - int;
 # 1 - float
 IntOrFloatES = 0
-ByteOrderES = 0
-if SelectedCSV == 1:
+ByteOrderES = ByteOrder4ES
+if SelectedCSV == 1 or SelectedCSV == 6:
     ByteOrder = ByteOrder1
     IntOrFloat = IntOrFloat1
 elif SelectedCSV == 2:
@@ -95,6 +100,11 @@ EncryptMode = 0
 EncryptModeReset = 0
 HEXString = 0
 NormalString = 0
+ArmorSlotCount = 5
+ArmorCurrent = 0
+ArmorBIN = 0
+AugmentCounter = 0
+EncodedCSVFiles = 0
 ## -------------
 
 # Reads stuff and cleans empty rows
@@ -138,6 +148,8 @@ while RowsConverted < len(Numbers):
         if EncryptModeReset == 1:
             IOFOrder = 0
             EncryptModeReset = 0
+    if AugmentCounter >= 144:
+        EncryptMode = 2
     if Order<len(ByteOrder)-2 and ByteOrder[Order]!=8 and str(ByteOrder[Order])!='text' and EncryptMode==0:
         NormalString = int(Numbers[RowsConverted])
         HEXString = NormalString.to_bytes(int(ByteOrder[Order]/2), 'big')
@@ -167,6 +179,8 @@ while RowsConverted < len(Numbers):
         if SelectedCSV == 4:
             EncryptMode=1
             EncryptModeReset=1
+        if SelectedCSV == 5:
+            AugmentCounter = AugmentCounter + 1
         RowsConverted=RowsConverted+1
     elif Order==len(ByteOrder)-2 and ByteOrder[Order]==8 and str(ByteOrder[Order])!='text' and EncryptMode==0:
         NormalString = Numbers[RowsConverted]
@@ -183,6 +197,8 @@ while RowsConverted < len(Numbers):
         if SelectedCSV == 4:
             EncryptMode=1
             EncryptModeReset = 1
+        if SelectedCSV == 5:
+            AugmentCounter = AugmentCounter + 1
         BinaryEncoded.write(HEXString)
         Order=0
         RowsConverted=RowsConverted+1
@@ -238,5 +254,68 @@ while RowsConverted < len(Numbers):
                 EnemyGradeOrderES=EnemyGradeOrderES+1
         Order=0
         RowsConverted=RowsConverted+1
+    elif (Order<len(ByteOrderA)-2 and (Order == 0 or Order == 1 or Order >=7)) and ByteOrderA[Order]!=8 and str(ByteOrderA[Order])!='text' and EncryptMode==2:
+        NormalString = int(Numbers[RowsConverted])
+        HEXString = NormalString.to_bytes(int(ByteOrderA[Order]/2), 'big')
+        BinaryEncoded.write(HEXString)
+        if Order == 1:
+            ArmorBIN = int(Numbers[RowsConverted])
+        Order=Order+1
+        RowsConverted=RowsConverted+1
+    elif (Order>=2 and Order<=6) and ByteOrderA[Order]!=8 and str(ByteOrderA[Order])!='text' and EncryptMode==2:
+        while ArmorCurrent < ArmorSlotCount:
+            if ArmorCurrent < ArmorBIN:
+                NormalString = int(Numbers[RowsConverted])
+                HEXString = NormalString.to_bytes(int(ByteOrderA[Order]/2), 'big')
+                BinaryEncoded.write(HEXString)
+                Order=Order+1
+                RowsConverted=RowsConverted+1
+            else:
+                Order=Order+1
+                RowsConverted=RowsConverted+1
+            ArmorCurrent = ArmorCurrent + 1
+    elif Order<len(ByteOrderA)-2 and ByteOrderA[Order]==8 and str(ByteOrderA[Order])!='text' and EncryptMode==2:
+        NormalString = Numbers[RowsConverted]
+        if IntOrFloat[IOFOrder] == 0:
+            NormalString = int(Numbers[RowsConverted])
+            HEXString = binascii.hexlify(struct.pack('>f', float(NormalString)))
+            HEX2String = str(HEXString)
+            HEX2String = HEX2String[2:len(HEX2String)-1]
+            HEXString = NormalString.to_bytes(ByteOrderA[Order]-4, 'big')
+            IOFOrder = IOFOrder + 1
+        elif IntOrFloat[IOFOrder] == 1:
+            HEXString = bytes.fromhex(HEX2String)
+            IOFOrder = IOFOrder + 1
+        BinaryEncoded.write(HEXString)
+        Order=Order+1
+        RowsConverted=RowsConverted+1
+    elif Order==len(ByteOrderA)-2 and ByteOrderA[Order]!=8 and str(ByteOrderA[Order])!='text' and EncryptMode==2:
+        NormalString = int(Numbers[RowsConverted])
+        HEXString = NormalString.to_bytes(int(ByteOrderA[Order]/2), 'big')
+        BinaryEncoded.write(HEXString)
+        Order=0
+        IOFOrder = 0
+        RowsConverted=RowsConverted+1
+        ArmorCurrent = 0
+    elif Order==len(ByteOrderA)-2 and ByteOrderA[Order]==8 and str(ByteOrderA[Order])!='text' and EncryptMode==2:
+        NormalString = Numbers[RowsConverted]
+        if IntOrFloat[IOFOrder] == 0 and CSVFile != 2:
+            NormalString = int(Numbers[RowsConverted])
+            HEXString = NormalString.to_bytes(ByteOrderA[Order]-4, 'big')
+            IOFOrder = IOFOrder + 1
+        elif IntOrFloat[IOFOrder] == 1 or CSVFile == 2:
+            HEXString = binascii.hexlify(struct.pack('>f', float(NormalString)))
+            HEX2String = str(HEXString)
+            HEX2String = HEX2String[2:len(HEX2String)-1]
+            HEXString = bytes.fromhex(HEX2String)
+            IOFOrder = IOFOrder + 1
+        ArmorCurrent = 0
+        BinaryEncoded.write(HEXString)
+        Order=0
+        IOFOrder = 0
+        RowsConverted=RowsConverted+1
+##if SelectedCSV == 5:
+##    AugUnknown = bytes.fromhex(AugmentUnknown)
+##    BinaryEncoded.write(AugUnknown)
 BinaryEncoded.close()
 
